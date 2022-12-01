@@ -171,7 +171,7 @@ class DigitClassificationModel(object):
                 (also called logits)
         """
         first = nn.AddBias(nn.Linear(x, self.w1), self.b1)
-        second = nn.Linear(first, self.w2)
+        second = nn.Linear(nn.ReLU(first), self.w2)
         return nn.AddBias(second, self.b2)
 
     def get_loss(self, x, y):
@@ -195,7 +195,7 @@ class DigitClassificationModel(object):
         """
         loss = float("inf")
         accuracy = -float("inf")
-        while accuracy <= 0.97:
+        while accuracy <= 0.98 and loss >= 0.017:
             for x, y in dataset.iterate_once(self.batch_size):
                 loss = self.get_loss(x, y)
                 gradients = nn.gradients(loss, [self.w1, self.b1, self.w2,
