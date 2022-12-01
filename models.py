@@ -81,6 +81,7 @@ class RegressionModel(object):
         self.b2 = nn.Parameter(1, 1)
         # Create w1, w2, b1, b2
 
+
     def run(self, x):
         """
         Runs the model for a batch of examples.
@@ -91,7 +92,6 @@ class RegressionModel(object):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE ***"
-        # return nn.DotProduct(x, self.w1)
         first = nn.AddBias(nn.Linear(x, self.w1), self.b1)
         second = nn.Linear(nn.ReLU(first), self.w2)
         return nn.AddBias(second, self.b2)
@@ -101,36 +101,33 @@ class RegressionModel(object):
         """
         Computes the loss for a batch of examples.
 
+        Compares predicted y with actual y.
+
         Inputs:
             x: a node with shape (batch_size x 1)
             y: a node with shape (batch_size x 1), containing the true y-values
                 to be used for training
         Returns: a loss node
         """
-        "*** YOUR CODE HERE ***"
-        return nn.SquareLoss(y, self.run(x))
-        # return nn.SquareLoss(y, x)
+        return nn.SquareLoss(self.run(x), y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
-        batch_size = 200 
-        updating = True
-        while updating:
-            updating = False
-            for x,y in dataset.iterate_once(self.batch_size):
+        loss = float("inf")
+        while loss >= 0.017:
+            for x, y in dataset.iterate_once(self.batch_size):
                 loss = self.get_loss(x, y)
-                gradients = nn.gradients(loss, [self.w1, self.b1, self.w2, self.b2])
-                self.w1 = nn.update(gradients[0], self.learning_rate)
-                self.w1 = nn.update(gradients[0], self.learning_rate)
+                gradients = nn.gradients(loss, [self.w1, self.b1, self.w2,
+                                                self.b2])
+                loss = nn.as_scalar(loss)
+                self.w1.update(gradients[0], -self.learning_rate)
+                self.b1.update(gradients[1], -self.learning_rate)
+                self.w2.update(gradients[2], -self.learning_rate)
+                self.b2.update(gradients[3], -self.learning_rate)
 
-                # if nn.as_scalar(y) != y_pred:
-                #     self.w.update(direction=x, multiplier=nn.as_scalar(y))
-                #     updating = True
-
-      
 
 class DigitClassificationModel(object):
     """
