@@ -193,7 +193,19 @@ class DigitClassificationModel(object):
         """
         Trains the model.
         """
-
+        loss = float("inf")
+        accuracy = -float("inf")
+        while accuracy <= 0.97:
+            for x, y in dataset.iterate_once(self.batch_size):
+                loss = self.get_loss(x, y)
+                gradients = nn.gradients(loss, [self.w1, self.b1, self.w2,
+                                                self.b2])
+                loss = nn.as_scalar(loss)
+                self.w1.update(gradients[0], -self.learning_rate)
+                self.b1.update(gradients[1], -self.learning_rate)
+                self.w2.update(gradients[2], -self.learning_rate)
+                self.b2.update(gradients[3], -self.learning_rate)
+                accuracy = dataset.get_validation_accuracy()
 
 class LanguageIDModel(object):
     """
