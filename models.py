@@ -74,12 +74,9 @@ class RegressionModel(object):
         self.batch_size = 200
         self.learning_rate = 0.05
         self.w1 = nn.Parameter(1, self.hidden)
-        # self.b1 = nn.Parameter(self.batch_size, self.hidden)
         self.b1 = nn.Parameter(1, self.hidden)
         self.w2 = nn.Parameter(self.hidden, 1)
-        # self.b2 = nn.Parameter(self.batch_size, 1)
         self.b2 = nn.Parameter(1, 1)
-        # Create w1, w2, b1, b2
 
 
     def run(self, x):
@@ -146,6 +143,18 @@ class DigitClassificationModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
+        self.hidden = 200
+        self.batch_size = 100
+        self.learning_rate = 0.5
+        # Weight 1: len(input dim) x num(hidden layer)
+        self.w1 = nn.Parameter(784, self.hidden)
+        # Bias 1: size num(hidden layer)
+        self.b1 = nn.Parameter(1, self.hidden)
+        # Weight 2: b1 * w2, so the first dim must be num(hidden layer)
+        # (continued) the second dim is of num(classes)
+        self.w2 = nn.Parameter(self.hidden, 10)
+        # Bias 2: size num(classes)
+        self.b2 = nn.Parameter(1, 10)
 
     def run(self, x):
         """
@@ -161,7 +170,9 @@ class DigitClassificationModel(object):
             A node with shape (batch_size x 10) containing predicted scores
                 (also called logits)
         """
-        "*** YOUR CODE HERE ***"
+        first = nn.AddBias(nn.Linear(x, self.w1), self.b1)
+        second = nn.Linear(first, self.w2)
+        return nn.AddBias(second, self.b2)
 
     def get_loss(self, x, y):
         """
@@ -176,13 +187,13 @@ class DigitClassificationModel(object):
             y: a node with shape (batch_size x 10)
         Returns: a loss node
         """
-        "*** YOUR CODE HERE ***"
+        return nn.SoftmaxLoss(self.run(x), y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
-        "*** YOUR CODE HERE ***"
+
 
 class LanguageIDModel(object):
     """
